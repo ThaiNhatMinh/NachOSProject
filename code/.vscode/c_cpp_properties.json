@@ -26,17 +26,35 @@
         {
             "name": "Linux",
             "includePath": [
-                "/usr/include",
+                "/usr/include/c++/5.4.0",
                 "/usr/local/include",
-                "${workspaceRoot}"
+                "/usr/include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/bin",
+                "${workspaceRoot}/filesys",
+                "${workspaceRoot}/machine",
+                "${workspaceRoot}/network",
+                "${workspaceRoot}/test",
+                "${workspaceRoot}/threads",
+                "${workspaceRoot}/userprog",
+                "${workspaceRoot}/vm"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "/usr/include",
+                    "/usr/include/c++/5.4.0",
                     "/usr/local/include",
-                    "${workspaceRoot}"
+                    "/usr/include",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/bin",
+                    "${workspaceRoot}/filesys",
+                    "${workspaceRoot}/machine",
+                    "${workspaceRoot}/network",
+                    "${workspaceRoot}/test",
+                    "${workspaceRoot}/threads",
+                    "${workspaceRoot}/userprog",
+                    "${workspaceRoot}/vm"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""

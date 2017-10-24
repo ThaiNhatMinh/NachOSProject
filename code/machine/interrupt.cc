@@ -74,7 +74,8 @@ Interrupt::Interrupt()
 Interrupt::~Interrupt()
 {
     while (!pending->IsEmpty())
-	delete (PendingInterrupt *)pending->Remove();
+    delete (PendingInterrupt *)pending->Remove();
+    
     delete pending;
 }
 
@@ -151,7 +152,7 @@ void
 Interrupt::OneTick()
 {
     MachineStatus old = status;
-
+    
 // advance simulated time
     if (status == SystemMode) {
         stats->totalTicks += SystemTick;
