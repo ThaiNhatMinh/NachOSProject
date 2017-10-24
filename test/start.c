@@ -74,13 +74,13 @@ Join:
 	j	$31
 	.end Join
 
-	.globl Create
-	.ent	Create
-Create:
+	.globl CreateAAA
+	.ent	CreateAAA
+	CreateAAA:
 	addiu $2,$0,SC_Create
 	syscall
 	j	$31
-	.end Create
+	.end CreateAAA
 
 	.globl Open
 	.ent	Open
