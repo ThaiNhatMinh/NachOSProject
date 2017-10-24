@@ -157,7 +157,9 @@ class Machine {
 				// code and data, while executing
     int registers[NumTotalRegs]; // CPU registers, for executing user programs
 
-
+	//-------------------------NEW CODE--------------------------------------
+	char* User2System(int virtAddr,int limit);
+	int System2User(int virtAddr,int len,char* buffer);
 // NOTE: the hardware translation of virtual addresses in the user program
 // to physical addresses (relative to the beginning of "mainMemory")
 // can be controlled by one of:
