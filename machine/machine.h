@@ -103,6 +103,17 @@ class Instruction {
 //
 // The procedures in this class are defined in machine.cc, mipssim.cc, and
 // translate.cc.
+class IOStream
+{
+	union
+	{
+		
+	}
+	// type of this data. Console or file.
+	int Type;
+	// state of this data. open or close.
+	int state;
+};
 
 class Machine {
   public:

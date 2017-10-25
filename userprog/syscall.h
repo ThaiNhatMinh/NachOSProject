@@ -29,7 +29,8 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
-
+#define SC_ConRead  11
+#define SC_ConWrite 12
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -41,6 +42,7 @@
  * are then invoked in the Nachos kernel, after appropriate error checking, 
  * from the system call entry point in exception.cc.
  */
+
 
 /* Stop Nachos, and print out performance stats */
 void Halt();		
@@ -87,26 +89,31 @@ typedef int OpenFileId;
 #define ConsoleOutput	1  
  
 /* Create a Nachos file, with "name" */
-int CreateAAA(char *name);
+int CreateFile(char *name);
 
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
  */
-OpenFileId Open(char *name);
+OpenFileId Open(char *name,int type);
+
+/* Close the file, we're done reading and writing to it. */
+void Close(OpenFileId asd);
 
 /* Write "size" bytes from "buffer" to the open file. */
-void Write(char *buffer, int size, OpenFileId id);
+//void Write(char *buffer, int size, OpenFileId id);
 
+
+/* Read char array from input device */
+int Read(char *buffer, int charcount, OpenFileId id);
+int Write(char *buffer, int charcount, OpenFileId id);
 /* Read "size" bytes from the open file into "buffer".  
  * Return the number of bytes actually read -- if the open file isn't
  * long enough, or if it is an I/O device, and there aren't enough 
  * characters to read, return whatever is available (for I/O devices, 
  * you should always wait until you can return at least one character).
  */
-int Read(char *buffer, int size, OpenFileId id);
+//int Read(char *buffer, int size, OpenFileId id);
 
-/* Close the file, we're done reading and writing to it. */
-void Close(OpenFileId id);
 
 
 
