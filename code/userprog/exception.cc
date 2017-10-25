@@ -91,6 +91,7 @@ ExceptionHandler(ExceptionType which)
                     interrupt->Halt();
                     break;
                 case SC_Create:
+                {
                     int virtAddr;
                     char* filename;
                     DEBUG('a',"\n SC_Create call ...");
@@ -117,7 +118,7 @@ ExceptionHandler(ExceptionType which)
                     // hành Linux, chúng ta không quản ly trực tiếp các block trên
                     // đĩa cứng cấp phát cho file, việc quản ly các block của file
                     // trên ổ đĩa là một đồ án khác
-                    if (!fileSystem->Create(filename,0))
+                    if (!fileSystem->Create(filename,10))
                     {
                         printf("\n Error create file '%s'",filename);
                         machine->WriteRegister(2,-1);
@@ -128,6 +129,39 @@ ExceptionHandler(ExceptionType which)
                     // người dùng thành công
                     delete filename;
                     break;
+                }
+                case SC_Read:
+                {
+                    int virtAddr;
+                    virtAddr = machine->ReadRegister(4);
+                    int maxchar = machine->ReadRegister(5);
+                    int ID = machine->ReadRegister(6);
+                    if(ID==0||ID==1)
+                    {
+                        char* sysBuffer = new char[maxchar+1];
+                        int nChar = gSynchConsole->Read(sysBuffer,maxchar);
+                        machine->System2User(virtAddr,nChar,sysBuffer);
+                        machine->WriteRegister(2,nChar);
+                        delete [] sysBuffer;
+                    }
+                    break;
+                }
+                case SC_Write:
+                {
+                    int virtAddr;
+                    virtAddr = machine->ReadRegister(4);
+                    int maxchar = machine->ReadRegister(5);
+                    int ID = machine->ReadRegister(6);
+                    if(ID==0||ID==1)
+                    {
+                        char* sysBuffer = machine->User2System(virtAddr,maxchar);
+                        int nChar = gSynchConsole->Write(sysBuffer,maxchar);
+                        machine->WriteRegister(2,nChar);
+                        delete[] sysBuffer;
+                    }
+                    break;
+                }
+                    
             }
             //int aaa = machine->registers[NextPCReg]+4;
             machine->registers[PrevPCReg] = machine->registers[PCReg];	// for debugging, in case we

@@ -3,9 +3,9 @@
 
 int main()
 {
-    CreateAAA("Test1.txt");
-    CreateAAA("Test2.txt");
-    CreateAAA("Test3.txt");
-    CreateAAA("Test4.txt");
-    CreateAAA("Test5.txt");
+    char str[512];
+    Write("Nhap ten file: ",256,0);
+    Read(str,512,0);
+    CreateFile(str);
+    return 0;
 }
