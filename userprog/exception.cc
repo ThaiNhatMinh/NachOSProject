@@ -53,7 +53,7 @@ ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
     //-----------------------------NEW CODE------------------------------------
-    printf("Call to ExceptionHandler() %d %d\n", which, type);
+    //printf("Call to ExceptionHandler() %d %d\n", which, type);
     switch(which)
     {
         case NoException:
@@ -146,7 +146,7 @@ ExceptionHandler(ExceptionType which)
                     int id = fileSystem->Open(nameFile,type);
                     if(id==-1) machine->WriteRegister(2,-1);
                     else machine->WriteRegister(2,id);
-                    printf("ID = %d\n",id);
+                    //printf("ID = %d\n",id);
                     delete[] nameFile;
                     
 
@@ -157,6 +157,7 @@ ExceptionHandler(ExceptionType which)
                     int id = machine->ReadRegister(4);
                     if(fileSystem->Close(id)) machine->WriteRegister(2,0);
                     else machine->WriteRegister(2,-1);
+                    break;
                 }
                 case SC_Read:
                 {
@@ -167,7 +168,7 @@ ExceptionHandler(ExceptionType which)
                     int ID = machine->ReadRegister(6);
                     if(ID==0||ID==1)
                     {
-                        char* sysBuffer = new char[maxchar+1];
+                        char* sysBuffer = new char[maxchar];
                         if(sysBuffer==NULL) 
                         {
                             machine->WriteRegister(2,-1);
@@ -184,6 +185,7 @@ ExceptionHandler(ExceptionType which)
                         if(nChar==-1) machine->WriteRegister(2,-2);
                         else machine->WriteRegister(2,nChar);
                         delete [] sysBuffer;
+                        break;
                     }
                     else if(ID>9||ID<0)
                     {
@@ -200,6 +202,7 @@ ExceptionHandler(ExceptionType which)
 
                         char* sysBuffer = new char[maxchar];
                         int numRead = fileSystem->IOStream[ID]->Read(sysBuffer,maxchar);
+                        //printf("DEBUG: %s %d\t",sysBuffer,maxchar);
                         if(fileSystem->IOStream[ID]->Eof()) machine->WriteRegister(2,-2);
                         else machine->WriteRegister(2,numRead);
                         machine->System2User(virtAddr,numRead,sysBuffer);
@@ -207,7 +210,6 @@ ExceptionHandler(ExceptionType which)
                         delete[] sysBuffer;
                         break;
                     }
-                    break;
                 }
                 case SC_Write:
                 {
@@ -222,6 +224,7 @@ ExceptionHandler(ExceptionType which)
                         int nChar = gSynchConsole->Write(sysBuffer,maxchar);
                         machine->WriteRegister(2,nChar);
                         delete[] sysBuffer;
+                        break;
                     } 
                     else if(ID>9||ID<0) 
                     {
@@ -252,8 +255,8 @@ ExceptionHandler(ExceptionType which)
                         int numWrite = fileSystem->IOStream[ID]->Write(sysBuffer,maxchar);
                         machine->WriteRegister(2,numWrite);
                         delete[] sysBuffer;
+                        break;
                     }
-                    break;
                 }
                 case SC_Seek:
                 {
