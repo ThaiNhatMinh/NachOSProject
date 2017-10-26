@@ -130,25 +130,89 @@ ExceptionHandler(ExceptionType which)
                     delete filename;
                     break;
                 }
+                case SC_OpenFile:
+                {
+                    int virtAddr;
+                    virtAddr = machine->ReadRegister(4);
+                    int type = machine->ReadRegister(5);
+                    char* nameFile = machine->User2System(virtAddr,256);
+                    if(strcmp(nameFile,"stdin")==0 || strcmp(nameFile,"stdout")==0)
+                    {
+                        delete[] nameFile;
+                        machine->WriteRegister(2,0);
+                        break;
+                    }
+                    
+                    int id = fileSystem->Open(nameFile,type);
+                    if(id==-1) machine->WriteRegister(2,-1);
+                    else machine->WriteRegister(2,id);
+                    printf("ID = %d\n",id);
+                    delete[] nameFile;
+                    
+
+                    break;
+                }
+                case SC_CloseFile:
+                {
+                    int id = machine->ReadRegister(4);
+                    if(fileSystem->Close(id)) machine->WriteRegister(2,0);
+                    else machine->WriteRegister(2,-1);
+                }
                 case SC_Read:
                 {
                     int virtAddr;
+                    //OpenFile* pOpenFile;
                     virtAddr = machine->ReadRegister(4);
                     int maxchar = machine->ReadRegister(5);
                     int ID = machine->ReadRegister(6);
                     if(ID==0||ID==1)
                     {
                         char* sysBuffer = new char[maxchar+1];
+                        if(sysBuffer==NULL) 
+                        {
+                            machine->WriteRegister(2,-1);
+                            break;
+                        }
                         int nChar = gSynchConsole->Read(sysBuffer,maxchar);
-                        machine->System2User(virtAddr,nChar,sysBuffer);
-                        machine->WriteRegister(2,nChar);
+                        
+                        if(machine->System2User(virtAddr,nChar,sysBuffer)==-1)
+                        {
+                            machine->WriteRegister(2,-1);
+                            break;
+                        }
+                        
+                        if(nChar==-1) machine->WriteRegister(2,-2);
+                        else machine->WriteRegister(2,nChar);
                         delete [] sysBuffer;
+                    }
+                    else if(ID>9||ID<0)
+                    {
+                        machine->WriteRegister(2,-1);
+                        break;
+                    }else
+                    {
+                        //pOpenFile = fileSystem->IOStream[ID];
+                        if(fileSystem->IOStream[ID]==NULL)
+                        {
+                            machine->WriteRegister(2,-1);
+                            break;
+                        }
+
+                        char* sysBuffer = new char[maxchar];
+                        int numRead = fileSystem->IOStream[ID]->Read(sysBuffer,maxchar);
+                        if(fileSystem->IOStream[ID]->Eof()) machine->WriteRegister(2,-2);
+                        else machine->WriteRegister(2,numRead);
+                        machine->System2User(virtAddr,numRead,sysBuffer);
+
+                        delete[] sysBuffer;
+                        break;
                     }
                     break;
                 }
                 case SC_Write:
                 {
                     int virtAddr;
+                    //OpenFile* pOpenFile;
                     virtAddr = machine->ReadRegister(4);
                     int maxchar = machine->ReadRegister(5);
                     int ID = machine->ReadRegister(6);
@@ -158,8 +222,65 @@ ExceptionHandler(ExceptionType which)
                         int nChar = gSynchConsole->Write(sysBuffer,maxchar);
                         machine->WriteRegister(2,nChar);
                         delete[] sysBuffer;
+                    } 
+                    else if(ID>9||ID<0) 
+                    {
+                        machine->WriteRegister(2,-1);
+                        break;
+                    }
+                    else
+                    {
+                        //pOpenFile = fileSystem->IOStream[ID];
+                        if(fileSystem->IOStream[ID]==NULL)
+                        {
+                            machine->WriteRegister(2,-1);
+                            break;
+                        }
+                        else if(fileSystem->IOStream[ID]->Type()==1 || fileSystem->IOStream[ID]->Type()==2)
+                        {
+                            machine->WriteRegister(2,-1);
+                            break;
+                        }
+                        char* sysBuffer = new char[maxchar];
+                        if(sysBuffer==NULL)
+                        {
+                            machine->WriteRegister(2,-1);
+                            break;
+                        }
+                        sysBuffer = machine->User2System(virtAddr,maxchar);
+                        
+                        int numWrite = fileSystem->IOStream[ID]->Write(sysBuffer,maxchar);
+                        machine->WriteRegister(2,numWrite);
+                        delete[] sysBuffer;
                     }
                     break;
+                }
+                case SC_Seek:
+                {
+                    int ID = machine->ReadRegister(5);
+                    if(ID==0||ID==1) 
+                    {
+                        printf("Error: Can not seek on console.\n");
+                        break;
+                    }
+                    else if(ID>9||ID<0)
+                    {
+                        machine->WriteRegister(2,-1);
+                        break;
+                    }
+
+                    //OpenFile* pOpenFile = fileSystem->IOStream[ID];
+                    if(fileSystem->IOStream[ID]==NULL)
+                    {
+                        machine->WriteRegister(2,-1);
+                        break;
+                    }
+
+                    int pos = machine->ReadRegister(4);
+                    int r = fileSystem->IOStream[ID]->Seek(pos);
+                    machine->WriteRegister(2,r);
+                    break;
+
                 }
                     
             }

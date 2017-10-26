@@ -34,6 +34,13 @@ OpenFile::OpenFile(int sector)
     seekPosition = 0;
 }
 
+OpenFile::OpenFile(int sector,int t)
+{
+    hdr = new FileHeader;
+    hdr->FetchFrom(sector);
+    seekPosition = 0;
+    type = t;
+}
 //----------------------------------------------------------------------
 // OpenFile::~OpenFile
 // 	Close a Nachos file, de-allocating any in-memory data structures.
@@ -52,10 +59,12 @@ OpenFile::~OpenFile()
 //	"position" -- the location within the file for the next Read/Write
 //----------------------------------------------------------------------
 
-void
-OpenFile::Seek(int position)
+int
+OpenFile::Seek(int pos)
 {
-    seekPosition = position;
+    if(pos==-1) pos = hdr->FileLength();
+    seekPosition = pos;
+    return seekPosition;
 }	
 
 //----------------------------------------------------------------------
@@ -194,4 +203,17 @@ int
 OpenFile::Length() 
 { 
     return hdr->FileLength(); 
+}
+
+
+//----------------------------------------------------------------------
+// OpenFile::Eof
+// 	Return true if reading at end of file
+//----------------------------------------------------------------------
+
+
+bool OpenFile::Eof()
+{
+    if(seekPosition>=hdr->FileLength()) return true;
+    else return false;
 }

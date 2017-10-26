@@ -29,8 +29,9 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
-#define SC_ConRead  11
-#define SC_ConWrite 12
+#define SC_Seek     11
+#define SC_OpenFile 12
+#define SC_CloseFile 13
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -104,8 +105,11 @@ void Close(OpenFileId asd);
 
 
 /* Read char array from input device */
+OpenFileId OpenFile(char *name,int type);
+int CloseFile(OpenFileId id);
 int Read(char *buffer, int charcount, OpenFileId id);
 int Write(char *buffer, int charcount, OpenFileId id);
+int Seek(int pos, OpenFileId id);
 /* Read "size" bytes from the open file into "buffer".  
  * Return the number of bytes actually read -- if the open file isn't
  * long enough, or if it is an I/O device, and there aren't enough 

@@ -82,6 +82,22 @@ CreateFile:
 	j	$31
 	.end CreateFile
 
+	.globl OpenFile
+	.ent OpenFile
+OpenFile:
+	addiu $2,$0,SC_OpenFile
+	syscall
+	j	$31
+	.end OpenFile
+
+	.globl CloseFile
+	.ent CloseFile
+CloseFile:
+	addiu $2,$0,SC_CloseFile
+	syscall
+	j	$31
+	.end CloseFile
+	
 	.globl Open
 	.ent	Open
 Open:
@@ -105,6 +121,14 @@ Write:
 	syscall
 	j	$31
 	.end Write
+
+	.globl Seek
+	.ent	Seek
+Seek:
+	addiu $2,$0,SC_Seek
+	syscall
+	j	$31
+	.end Seek
 
 	.globl Close
 	.ent	Close

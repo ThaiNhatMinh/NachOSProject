@@ -43,37 +43,89 @@
 				// implementation is available
 class FileSystem {
   public:
-    FileSystem(bool format) {}
+	OpenFile* IOStream[10];
 
-    bool Create(char *name, int initialSize) { 
-	int fileDescriptor = OpenForWrite(name);
+	FileSystem(bool format) 
+	{
 
-	if (fileDescriptor == -1) return FALSE;
-	Close(fileDescriptor); 
-	return TRUE; 
+		for(int i=0; i<10; i++) IOStream[i] = NULL; 
+		Create("stdin",0);
+		Create("stdout",0);
+		//Open("stdin",2,0);
+		//Open("stdout",2,1);
+		//Do it by myselt;
+		IOStream[0] = Open("stdin");
+		IOStream[1] = Open("stdout");
+	}
+	~FileSystem()
+	{
+		for(int i=0; i<10; i++)
+		{
+			if(IOStream[i]!=NULL) delete IOStream[i];
+		}
+	}
+	bool Create(char *name, int initialSize) 
+	{ 
+		int fileDescriptor = OpenForWrite(name);
+
+		if (fileDescriptor == -1) return FALSE;
+		Close(fileDescriptor); 
+		return TRUE; 
 	}
 
-    OpenFile* Open(char *name) {
-	  int fileDescriptor = OpenForReadWrite(name, FALSE);
+	OpenFile* Open(char *name)
+	{
+		int fileDescriptor = OpenForReadWrite(name, FALSE);
 
-	  if (fileDescriptor == -1) return NULL;
-	  return new OpenFile(fileDescriptor);
-      }
+		if (fileDescriptor == -1) return NULL;
+		return new OpenFile(fileDescriptor);
+    }
+	int Open(char* name, int type)
+	{
+		int slot = FindSlot();
+		//printf("FileSystem::Open()::slot=%d\n",slot);
+		if(slot==-1) return -1;
 
-    bool Remove(char *name) { return Unlink(name) == 0; }
+		int fileDescriptor = OpenForReadWrite(name, FALSE);
+		
+		if (fileDescriptor == -1) return -1;
+		
+		IOStream[slot] = new OpenFile(fileDescriptor,type);
 
+		if(IOStream[slot]==NULL) return -1;
+
+		return slot;
+	}
+	bool Close(int id)
+	{
+		if(id==0|| id==1 || id>9) return false;
+		if(IOStream[id] ==NULL) return false;
+
+		delete IOStream[id];
+		IOStream[id] = NULL;
+		return true;
+	}
+    
+	int FindSlot()
+	{
+		for(int i=2; i<10; i++)
+			if(IOStream[i]==NULL) return i;
+		return -1;
+	}
+	bool Remove(char *name) { return Unlink(name) == 0; }
 };
 
 #else // FILESYS
 class FileSystem {
   public:
+	OpenFile* IOStream[10];
     FileSystem(bool format);		// Initialize the file system.
 					// Must be called *after* "synchDisk" 
 					// has been initialized.
     					// If "format", there is nothing on
 					// the disk, so initialize the directory
     					// and the bitmap of free blocks.
-
+	~FileSystem();
     bool Create(char *name, int initialSize);  	
 					// Create a file (UNIX creat)
 
@@ -85,11 +137,19 @@ class FileSystem {
 
     void Print();			// List all the files and their contents
 
+	int Open(char* name, int type);
+	bool Close(int id);
+	
+    
+	int FindSlot();
+
   private:
    OpenFile* freeMapFile;		// Bit map of free disk blocks,
 					// represented as a file
    OpenFile* directoryFile;		// "Root" directory -- list of 
 					// file names, represented as a file
+
+	
 };
 
 #endif // FILESYS

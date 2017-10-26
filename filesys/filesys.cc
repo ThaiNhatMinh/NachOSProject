@@ -142,6 +142,13 @@ FileSystem::FileSystem(bool format)
     }
 }
 
+FileSystem::~FileSystem()
+{
+    for(int i=0; i<10; i++)
+    {
+        if(IOStream[i]!=NULL) delete IOStream[i];
+    }
+}
 //----------------------------------------------------------------------
 // FileSystem::Create
 // 	Create a file in the Nachos file system (similar to UNIX create).
@@ -235,11 +242,60 @@ FileSystem::Open(char *name)
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
     if (sector >= 0) 		
-	openFile = new OpenFile(sector);	// name was found in directory 
+    openFile = new OpenFile(sector);	// name was found in directory 
+    
+   // int slot = FindSlot();
+
+    //if(slot ==-1) return NULL;
+    //IOStream[slot] = openFile;
+
     delete directory;
     return openFile;				// return NULL if not found
 }
 
+// FileSystem::Open(char*,int)
+// Open file with name. type is kind of operator(0 for read and write, 1 for read only, 2 only using for OS)
+// Return -1 if there is error, otherwhise return index of file.
+int FileSystem::Open(char* name, int type)
+{
+    int slot = FindSlot();
+    if(slot==-1) return -1;
+
+    Directory *directory = new Directory(NumDirEntries);
+    int sector;
+
+    DEBUG('f', "Opening file %s\n", name);
+    directory->FetchFrom(directoryFile);
+    sector = directory->Find(name); 
+    if (sector >= 0)    IOStream[slot]  = new OpenFile(sector,type);	// name was found in directory 
+
+    if(IOStream[slot]==NULL) return -1;
+
+    delete directory;
+
+    return slot;
+}
+
+// FileSystem::Close(int)
+// Close current file open. return -1 if invaild id or file already close
+bool FileSystem::Close(int id)
+{
+    if(id==0|| id==1 || id>9) return false;
+    if(IOStream[id] ==NULL) return false;
+
+    delete IOStream[id];
+    IOStream[id] = NULL;
+    return true;
+}
+
+// FileSystem::FindSlot()
+// Find empty slot on filesystem return -1 if all is using, otherwise return index of empty slot
+int FileSystem::FindSlot()
+{
+    for(int i=2; i<10; i++)
+        if(IOStream[i]!=NULL) return i;
+    return -1;
+}
 //----------------------------------------------------------------------
 // FileSystem::Remove
 // 	Delete a file from the file system.  This requires:
